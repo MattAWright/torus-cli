@@ -144,6 +144,7 @@ func (h *secretRotateHandler) list(ctx context.Context, org *envelope.Org) ([]ap
 	for _, project := range projects {
 		graphs, err := h.engine.client.CredentialGraph.Search(ctx,
 			"/"+org.Body.Name+"/"+project.Body.Name+"/*/*/*/*",
+			nil,
 			h.engine.session.AuthID())
 		if err != nil {
 			return nil, err

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/url"
+	"log"
 
 	"github.com/manifoldco/torus-cli/envelope"
 	"github.com/manifoldco/torus-cli/identity"
@@ -154,7 +155,7 @@ func (c *CredentialGraphClient) List(ctx context.Context, path string,
 // Search returns back all segments of the CredentialGraph (Keyring, Keyring
 // Members, and Credentials) that are contained within the given loose path
 // expression. It is loose in that it can have * for projects.
-func (c *CredentialGraphClient) Search(ctx context.Context, pathExp string,
+func (c *CredentialGraphClient) Search(ctx context.Context, pathExp string, teamIDs *[]string,
 	ownerID *identity.ID) ([]CredentialGraph, error) {
 
 	query := url.Values{}
@@ -162,6 +163,15 @@ func (c *CredentialGraphClient) Search(ctx context.Context, pathExp string,
 	query.Set("pathexp", pathExp)
 	query.Set("owner_id", ownerID.String())
 	query.Set("mode", "contains")
+
+	if teamIDs != nil {
+		for _, t := range *teamIDs {
+			query.Add("team_id", t)
+		}
+	}
+
+	log.Printf("CredentialGraph.Search - Team IDs:\n")
+	log.Printf("%+v\n", teamIDs)
 
 	return c.getGraph(ctx, query)
 }
@@ -174,9 +184,11 @@ func (c *CredentialGraphClient) getGraph(ctx context.Context, query url.Values) 
 		return nil, err
 	}
 
+	log.Printf("g.convert() %d\n", len(resp))
 	converted := make([]CredentialGraph, len(resp))
 	for i, g := range resp {
 		converted[i], err = g.convert()
+		log.Printf("%s\n", converted[i])
 		if err != nil {
 			return nil, err
 		}

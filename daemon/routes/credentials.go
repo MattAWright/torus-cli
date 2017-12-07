@@ -27,6 +27,7 @@ func credentialsGetRoute(engine *logic.Engine, o *observer.Observer) http.Handle
 
 		path := q.Get("path")
 		pathexp := q.Get("pathexp")
+		teamIDs := q["team_id"]
 		skip := q.Get("skip-decryption") == "true"
 		if path == "" && pathexp == "" {
 			err = errors.New("missing path or pathexp")
@@ -37,10 +38,11 @@ func credentialsGetRoute(engine *logic.Engine, o *observer.Observer) http.Handle
 
 		var creds []logic.PlaintextCredentialEnvelope
 		if path != "" {
-			creds, err = engine.RetrieveCredentials(ctx, n, &path, nil, skip)
+			creds, err = engine.RetrieveCredentials(ctx, n, &path, nil, &teamIDs, skip)
 		} else {
-			creds, err = engine.RetrieveCredentials(ctx, n, nil, &pathexp, skip)
+			creds, err = engine.RetrieveCredentials(ctx, n, nil, &pathexp, &teamIDs, skip)
 		}
+
 		if err != nil {
 			// Rely on logs inside engine for debugging
 			encodeResponseErr(w, err)

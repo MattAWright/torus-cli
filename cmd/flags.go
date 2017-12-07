@@ -71,6 +71,11 @@ func serviceSliceFlag(usage, value string, required bool) cli.Flag {
 	return newSlicePlaceholder("service, s", "SERVICE", usage, value, "TORUS_SERVICE", required)
 }
 
+// teamSliceFlag creates a new --team cli.StringSliceFlag with custom usage string.
+func teamSliceFlag(usage, value string, required bool) cli.Flag {
+	return newSlicePlaceholder("team, t", "TEAM", usage, value, "TORUS_TEAM", required)
+}
+
 // userFlag creates a new --user cli.Flag with custom usage string.
 func userFlag(usage string, required bool) cli.Flag {
 	return newPlaceholder("user, u", "USER", usage, "", "TORUS_USER", required)

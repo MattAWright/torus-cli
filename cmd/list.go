@@ -6,6 +6,7 @@ import (
 	"os"
 	"sync"
 	"text/tabwriter"
+	"reflect"
 
 	"github.com/urfave/cli"
 
@@ -14,6 +15,7 @@ import (
 	"github.com/manifoldco/torus-cli/config"
 	"github.com/manifoldco/torus-cli/envelope"
 	"github.com/manifoldco/torus-cli/errs"
+	"github.com/manifoldco/torus-cli/identity"
 	"github.com/manifoldco/torus-cli/pathexp"
 )
 
@@ -28,6 +30,7 @@ func init() {
 			projectFlag("Use this project.", false),
 			envSliceFlag("Use this environment.", false),
 			serviceSliceFlag("Use this service.", "", false),
+			teamSliceFlag("Use this team.", "", false),
 			cli.BoolFlag{
 				Name:  "verbose, v",
 				Usage: "Display the full credential path of each secret.",
@@ -131,6 +134,22 @@ func listCmd(ctx *cli.Context) error {
 	instanceFilters := []string{"*"}
 	idenityFilters := []string{"*"}
 
+	///////////// TEST //////////////
+	teams, err := client.Teams.GetByOrg(c, org.ID)
+	fmt.Println("Teams:")
+	fmt.Println(reflect.TypeOf(teams))
+	fmt.Println(teams)
+
+	var teamIDs []identity.ID
+	for _, t := range teams{
+		if t.Body.Name == "thebigians" || t.Body.Name == "member" {
+			fmt.Println("Adding team:", t.Body.Name)
+			fmt.Println("Adding team ID:", (*t.ID).String())
+			teamIDs = append(teamIDs, (*t.ID))
+		}
+	}
+
+
 	// Create a PathExp based on flags. This is the search space that
 	// will be used to retrieve credentials.
 	filterPathExp, err := pathexp.New(
@@ -167,7 +186,7 @@ func listCmd(ctx *cli.Context) error {
 
 	go func() {
 		// Get credentials
-		credentials, cErr = client.Credentials.Search(c, filterPathExp.String())
+		credentials, cErr = client.Credentials.Search(c, filterPathExp.String(), &teamIDs)
 		getEnvsServicesCreds.Done()
 	}()
 

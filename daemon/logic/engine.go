@@ -231,7 +231,7 @@ func (e *Engine) AppendCredentials(ctx context.Context, notifier *observer.Notif
 
 // RetrieveCredentials returns all credentials for the given CPath string
 func (e *Engine) RetrieveCredentials(ctx context.Context,
-	notifier *observer.Notifier, cpath, cpathexp *string, skipDecryption bool) ([]PlaintextCredentialEnvelope, error) {
+	notifier *observer.Notifier, cpath, cpathexp *string, teamIDs *[]string, skipDecryption bool) ([]PlaintextCredentialEnvelope, error) {
 	if cpath != nil && cpathexp != nil {
 		panic("cannot use both cpath and cpathexp")
 	}
@@ -244,7 +244,7 @@ func (e *Engine) RetrieveCredentials(ctx context.Context,
 	if cpath != nil {
 		graphs, err = e.client.CredentialGraph.List(ctx, *cpath, nil, e.session.AuthID())
 	} else if cpathexp != nil {
-		graphs, err = e.client.CredentialGraph.Search(ctx, *cpathexp, e.session.AuthID())
+		graphs, err = e.client.CredentialGraph.Search(ctx, *cpathexp, teamIDs, e.session.AuthID())
 	}
 
 	if err != nil {
